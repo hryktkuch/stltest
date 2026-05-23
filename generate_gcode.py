@@ -6,7 +6,7 @@ CIRCLE_DIA    = 50.0
 TOTAL_HEIGHT  = 50.0
 RING_HEIGHT   = 1.2
 LAYER_HEIGHT  = 3.0
-N_OSC_PER_REV = 9.5
+N_OSC_PER_REV = 18.5
 Z_AMP         = LAYER_HEIGHT / 2   # 1.5 mm
 N_MESH_REVS   = 15
 R             = CIRCLE_DIA / 2
@@ -14,9 +14,9 @@ PHASE         = -np.pi / 2
 
 # ---- Print Parameters ----
 FILAMENT_DIA  = 1.75        # mm
-PRINT_SPEED   = 15.0        # mm/s  (low speed for bridging)
+PRINT_SPEED   = 10.0        # mm/s  (low speed for bridging)
 TRAVEL_SPEED  = 100.0       # mm/s
-NOZZLE_TEMP   = 230         # °C
+NOZZLE_TEMP   = 220         # °C
 BED_TEMP      = 60          # °C
 BED_CX        = 200.0       # bed center X mm
 BED_CY        = 200.0       # bed center Y mm
@@ -116,6 +116,7 @@ c('G21                    ; Units mm')
 c('G90                    ; Absolute XYZ')
 c('M83                    ; Relative extrusion')
 c('G92 E0                 ; Reset extruder')
+c('M106 S255              ; Fan 100% (critical for bridging)')
 c('')
 
 # Move to start without extruding
@@ -131,9 +132,14 @@ c(f'G1 X{x0:.3f} Y{y0:.3f} Z{z0:.3f}  ; Start point (no extrusion)')
 # Print path
 sec_idx = 1
 for i in range(1, len(xs)):
-    # Section boundary comment
+    # Section boundary comment + flow rate switch
     if sec_idx < len(sec_starts) and i == sec_starts[sec_idx]:
-        c(f'; --- {sec_labels[sec_idx]} ---')
+        label = sec_labels[sec_idx]
+        c(f'; --- {label} ---')
+        if label in ('Bottom ring', 'Top ring'):
+            c('M221 S100              ; Flow 100% (ring)')
+        else:
+            c('M221 S80               ; Flow 80% (mesh/bridge)')
         sec_idx += 1
 
     dx = xs[i] - xs[i-1]
