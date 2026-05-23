@@ -1,0 +1,177 @@
+import numpy as np
+
+# ---- Mesh Parameters ----
+NOZZLE_DIA    = 1.8
+CIRCLE_DIA    = 50.0
+TOTAL_HEIGHT  = 50.0
+RING_HEIGHT   = 1.2
+LAYER_HEIGHT  = 3.0
+N_OSC_PER_REV = 9.5
+Z_AMP         = LAYER_HEIGHT / 2   # 1.5 mm
+N_MESH_REVS   = 15
+R             = CIRCLE_DIA / 2
+PHASE         = -np.pi / 2
+
+# ---- Print Parameters ----
+FILAMENT_DIA  = 1.75        # mm
+PRINT_SPEED   = 15.0        # mm/s  (low speed for bridging)
+TRAVEL_SPEED  = 100.0       # mm/s
+NOZZLE_TEMP   = 230         # °C
+BED_TEMP      = 60          # °C
+BED_CX        = 200.0       # bed center X mm
+BED_CY        = 200.0       # bed center Y mm
+
+PTS_PER_REV   = 200         # G-code points per revolution
+
+# ---- Extrusion ----
+filament_area  = np.pi * (FILAMENT_DIA / 2) ** 2   # mm²
+E_RING = (NOZZLE_DIA * RING_HEIGHT)  / filament_area  # mm/mm  (flat ring bead)
+E_MESH = (NOZZLE_DIA * Z_AMP)        / filament_area  # mm/mm  (mesh bead)
+
+# ==================================================
+# Path generation
+# ==================================================
+t1_s      = 4 * np.pi
+t1_e      = t1_s + 2 * np.pi * N_MESH_REVS   # = 34π
+z_base_s  = RING_HEIGHT + Z_AMP               # 2.7 mm
+z_range   = N_MESH_REVS * LAYER_HEIGHT        # 45 mm
+z_base_end = z_base_s + z_range               # 47.7 mm
+t_tpre_s  = t1_e
+t_tpre_e  = t_tpre_s + 2 * np.pi
+t_ramp_s  = t_tpre_e
+t_ramp_e  = t_ramp_s + np.pi / 2
+t_top_s   = t_ramp_e
+
+def path_section(t_s, t_e, n_pts, z_func, e_rate, label):
+    t   = np.linspace(t_s, t_e, n_pts)
+    x   = BED_CX + R * np.cos(t)
+    y   = BED_CY + R * np.sin(t)
+    z   = z_func(t)
+    return x, y, z, np.full(n_pts, e_rate), label
+
+def z_bottom_ring(t): return np.full_like(t, RING_HEIGHT)
+
+def z_0th_pre(t):
+    zb = (RING_HEIGHT + Z_AMP - LAYER_HEIGHT) + (t - 2*np.pi) / (2*np.pi) * LAYER_HEIGHT
+    return np.maximum(RING_HEIGHT, zb + Z_AMP * np.sin(N_OSC_PER_REV * t + PHASE))
+
+def z_mesh(t):
+    zb = z_base_s + (t - t1_s) / (t1_e - t1_s) * z_range
+    return zb + Z_AMP * np.sin(N_OSC_PER_REV * t + PHASE)
+
+def z_top_pre(t):
+    zb = z_base_end + (t - t_tpre_s) / (2*np.pi) * LAYER_HEIGHT
+    return np.minimum(TOTAL_HEIGHT, zb + Z_AMP * np.sin(N_OSC_PER_REV * t + PHASE))
+
+def z_ramp(t):
+    z_start = z_top_pre(np.array([t_tpre_e]))[0]
+    return np.linspace(z_start, TOTAL_HEIGHT, len(t))
+
+def z_top_ring(t): return np.full_like(t, TOTAL_HEIGHT)
+
+sections = [
+    path_section(0,          2*np.pi,            PTS_PER_REV,           z_bottom_ring, E_RING, 'Bottom ring'),
+    path_section(2*np.pi,    4*np.pi,            PTS_PER_REV,           z_0th_pre,     E_MESH, '0th pre-rev'),
+    path_section(t1_s,       t1_e,      N_MESH_REVS*PTS_PER_REV,        z_mesh,        E_MESH, 'Mesh'),
+    path_section(t_tpre_s,   t_tpre_e,           PTS_PER_REV,           z_top_pre,     E_MESH, 'Top pre-rev'),
+    path_section(t_ramp_s,   t_ramp_e,           50,                    z_ramp,        E_MESH, 'Ramp'),
+    path_section(t_top_s,    t_top_s+2*np.pi,    PTS_PER_REV,           z_top_ring,    E_RING, 'Top ring'),
+]
+
+xs = np.concatenate([s[0] for s in sections])
+ys = np.concatenate([s[1] for s in sections])
+zs = np.concatenate([s[2] for s in sections])
+es = np.concatenate([s[3] for s in sections])
+
+# Section boundary indices for comment injection
+sec_starts = np.cumsum([0] + [len(s[0]) for s in sections])
+sec_labels = [s[4] for s in sections]
+
+# ==================================================
+# G-code output
+# ==================================================
+F_PRINT  = int(PRINT_SPEED  * 60)
+F_TRAVEL = int(TRAVEL_SPEED * 60)
+
+lines = []
+def c(s):  lines.append(s)
+
+c('; ============================================')
+c('; Cylindrical Mesh Tube')
+c(f'; Cylinder:  φ{CIRCLE_DIA}mm × H{TOTAL_HEIGHT}mm')
+c(f'; Nozzle:    {NOZZLE_DIA}mm    Filament: {FILAMENT_DIA}mm')
+c(f'; Material:  PLA   Nozzle {NOZZLE_TEMP}°C  Bed {BED_TEMP}°C')
+c(f'; Speed:     {PRINT_SPEED}mm/s ({F_PRINT}mm/min)')
+c(f'; Center:    X{BED_CX} Y{BED_CY}')
+c(f'; E/mm ring: {E_RING:.4f}  E/mm mesh: {E_MESH:.4f}')
+c('; ============================================')
+c('')
+c('; --- Start sequence ---')
+c(f'M104 S{NOZZLE_TEMP}          ; Nozzle preheat')
+c(f'M140 S{BED_TEMP}             ; Bed preheat')
+c('G28                    ; Home all')
+c(f'M109 S{NOZZLE_TEMP}          ; Wait nozzle temp')
+c(f'M190 S{BED_TEMP}             ; Wait bed temp')
+c('G21                    ; Units mm')
+c('G90                    ; Absolute XYZ')
+c('M83                    ; Relative extrusion')
+c('G92 E0                 ; Reset extruder')
+c('')
+
+# Move to start without extruding
+x0, y0, z0 = xs[0], ys[0], zs[0]
+c(f'G1 Z10 F{F_TRAVEL}           ; Safety lift')
+c(f'G1 X{x0:.3f} Y{y0:.3f} F{F_TRAVEL}  ; Move to start XY')
+c(f'G1 Z{z0:.3f} F{int(F_TRAVEL/2)}       ; Lower to start Z')
+c(f'G1 F{F_PRINT}                ; Set print speed')
+c('')
+c(f'; --- {sec_labels[0]} ---')
+c(f'G1 X{x0:.3f} Y{y0:.3f} Z{z0:.3f}  ; Start point (no extrusion)')
+
+# Print path
+sec_idx = 1
+for i in range(1, len(xs)):
+    # Section boundary comment
+    if sec_idx < len(sec_starts) and i == sec_starts[sec_idx]:
+        c(f'; --- {sec_labels[sec_idx]} ---')
+        sec_idx += 1
+
+    dx = xs[i] - xs[i-1]
+    dy = ys[i] - ys[i-1]
+    dz = zs[i] - zs[i-1]
+    seg = np.sqrt(dx*dx + dy*dy + dz*dz)
+    if seg < 0.001:
+        continue
+
+    e_val = seg * es[i]
+    c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{zs[i]:.3f} E{e_val:.5f}')
+
+c('')
+c('; --- End sequence ---')
+c('M104 S0                ; Nozzle off')
+c('M140 S0                ; Bed off')
+c(f'G1 Z{min(TOTAL_HEIGHT+10, 250):.0f} F{F_TRAVEL}  ; Lift')
+c('G28 X0                 ; Home X')
+c('M84                    ; Disable motors')
+
+gcode = '\n'.join(lines)
+with open('cylinder_mesh.gcode', 'w') as f:
+    f.write(gcode)
+
+n_g1 = sum(1 for l in lines if l.startswith('G1'))
+total_e = sum(
+    np.sqrt((xs[i]-xs[i-1])**2 + (ys[i]-ys[i-1])**2 + (zs[i]-zs[i-1])**2) * es[i]
+    for i in range(1, len(xs))
+)
+total_len = sum(
+    np.sqrt((xs[i]-xs[i-1])**2 + (ys[i]-ys[i-1])**2 + (zs[i]-zs[i-1])**2)
+    for i in range(1, len(xs))
+)
+print('Generated: cylinder_mesh.gcode')
+print(f'  G1 moves    : {n_g1}')
+print(f'  Total lines : {len(lines)}')
+print(f'  Path length : {total_len:.1f} mm')
+print(f'  Total E     : {total_e:.1f} mm  ({total_e * np.pi*(FILAMENT_DIA/2)**2 / 1000:.2f} cm³)')
+print(f'  Print time  : ~{total_len / PRINT_SPEED / 60:.1f} min @ {PRINT_SPEED}mm/s')
+print(f'  E/mm ring   : {E_RING:.4f}')
+print(f'  E/mm mesh   : {E_MESH:.4f}')
