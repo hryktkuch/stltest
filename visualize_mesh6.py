@@ -7,10 +7,10 @@ NOZZLE_DIA    = 1.8
 CIRCLE_DIA    = 50.0
 TOTAL_HEIGHT  = 50.0
 RING_HEIGHT   = 1.2
-LAYER_HEIGHT  = 6.0
+LAYER_HEIGHT  = 3.0
 N_OSC_PER_REV = 9.5
-Z_AMP         = LAYER_HEIGHT / 2   # = 3.0 mm
-N_MESH_REVS   = 7
+Z_AMP         = LAYER_HEIGHT / 2   # = 1.5 mm
+N_MESH_REVS   = 15
 # --------------------
 
 R = CIRCLE_DIA / 2
