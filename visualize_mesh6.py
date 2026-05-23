@@ -7,11 +7,11 @@ NOZZLE_DIA    = 1.8
 CIRCLE_DIA    = 50.0
 TOTAL_HEIGHT  = 50.0
 RING_HEIGHT   = 1.2
-LAYER_HEIGHT  = 3.0
-N_OSC_PER_REV = 18.5
-OVERLAP       = 0.3    # mm  inter-layer overlap (>0 → peaks embed into next valley)
-Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2   # = 1.65 mm
-N_MESH_REVS   = 15
+LAYER_HEIGHT  = 4.5
+N_OSC_PER_REV = 9.5
+OVERLAP       = 1.0    # mm  inter-layer overlap (>0 → peaks embed into next valley)
+Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2   # = 2.75 mm
+N_MESH_REVS   = 9
 # --------------------
 
 R = CIRCLE_DIA / 2
