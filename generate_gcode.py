@@ -1,7 +1,7 @@
 import numpy as np
 
 # ---- Mesh Parameters ----
-NOZZLE_DIA    = 1.8
+NOZZLE_DIA    = 0.4
 CIRCLE_DIA    = 50.0
 TOTAL_HEIGHT  = 50.0
 RING_HEIGHT   = 1.2
@@ -19,8 +19,8 @@ PRINT_SPEED   = 10.0        # mm/s  (low speed for bridging)
 TRAVEL_SPEED  = 100.0       # mm/s
 NOZZLE_TEMP   = 220         # °C
 BED_TEMP      = 60          # °C
-BED_CX        = 200.0       # bed center X mm
-BED_CY        = 200.0       # bed center Y mm
+BED_CX        = 150.0       # bed center X mm
+BED_CY        = 150.0       # bed center Y mm
 
 PTS_PER_REV   = 200         # G-code points per revolution
 
@@ -107,7 +107,7 @@ c(f'; Center:    X{BED_CX} Y{BED_CY}')
 c(f'; E/mm ring: {E_RING:.4f}  E/mm mesh: {E_MESH:.4f}')
 c('; ============================================')
 c('')
-c('; --- Start sequence ---')
+c('; --- Start sequence (Bambu Lab P1S) ---')
 c(f'M104 S{NOZZLE_TEMP}          ; Nozzle preheat')
 c(f'M140 S{BED_TEMP}             ; Bed preheat')
 c('G28                    ; Home all')
@@ -117,7 +117,7 @@ c('G21                    ; Units mm')
 c('G90                    ; Absolute XYZ')
 c('M83                    ; Relative extrusion')
 c('G92 E0                 ; Reset extruder')
-c('M106 S255              ; Fan 100% (critical for bridging)')
+c('M106 P1 S255           ; Part cooling fan 100% (critical for bridging)')
 c('')
 
 # Move to start without extruding
@@ -154,7 +154,8 @@ for i in range(1, len(xs)):
     c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{zs[i]:.3f} E{e_val:.5f}')
 
 c('')
-c('; --- End sequence ---')
+c('; --- End sequence (Bambu Lab P1S) ---')
+c('M106 P1 S0             ; Part cooling fan off')
 c('M104 S0                ; Nozzle off')
 c('M140 S0                ; Bed off')
 c(f'G1 Z{min(TOTAL_HEIGHT+10, 250):.0f} F{F_TRAVEL}  ; Lift')
