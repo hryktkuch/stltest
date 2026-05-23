@@ -9,7 +9,8 @@ TOTAL_HEIGHT  = 50.0
 RING_HEIGHT   = 1.2
 LAYER_HEIGHT  = 3.0
 N_OSC_PER_REV = 18.5
-Z_AMP         = LAYER_HEIGHT / 2   # = 1.5 mm
+OVERLAP       = 0.3    # mm  inter-layer overlap (>0 → peaks embed into next valley)
+Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2   # = 1.65 mm
 N_MESH_REVS   = 15
 # --------------------
 
