@@ -7,7 +7,7 @@ NOZZLE_DIA    = 1.8    # mm
 CIRCLE_DIA    = 50.0   # mm
 TOTAL_HEIGHT  = 50.0   # mm
 LAYER_HEIGHT  = 6.0    # mm  (Z advance per revolution)
-N_OSC_PER_REV = 4.5   # oscillations per revolution (half-integer → diamond mesh)
+N_OSC_PER_REV = 9.0   # oscillations per revolution (half-integer → diamond mesh)
 # --------------------
 
 R      = CIRCLE_DIA / 2
@@ -21,7 +21,7 @@ x = R * np.cos(t)
 y = R * np.sin(t)
 z_base = t / (2 * np.pi * n_revs) * TOTAL_HEIGHT
 z_osc  = Z_AMP * np.sin(N_OSC_PER_REV * t)
-z      = z_base + z_osc
+z      = np.clip(z_base + z_osc, 0, TOTAL_HEIGHT)
 
 # ---- Figure ----
 fig = plt.figure(figsize=(16, 9))
