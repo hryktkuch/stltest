@@ -126,6 +126,7 @@ c('G21                    ; Units mm')
 c('G90                    ; Absolute XYZ')
 c('M83                    ; Relative extrusion')
 c('G92 E0                 ; Reset extruder')
+c('T0                     ; AMS slot 1 (filament selection)')
 c('M106 P1 S255           ; Part cooling fan 100% (critical for bridging)')
 c('')
 

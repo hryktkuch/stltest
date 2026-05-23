@@ -27,6 +27,7 @@ G21                    ; Units mm
 G90                    ; Absolute XYZ
 M83                    ; Relative extrusion
 G92 E0                 ; Reset extruder
+T0                     ; AMS slot 1 (filament selection)
 M106 P1 S255           ; Part cooling fan 100% (critical for bridging)
 
 G1 Z10 F6000           ; Safety lift
