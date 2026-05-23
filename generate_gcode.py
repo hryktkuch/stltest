@@ -15,7 +15,7 @@ PHASE         = -np.pi / 2
 
 # ---- Print Parameters (Elegoo Neptune 4 Max) ----
 FILAMENT_DIA  = 1.75        # mm
-PRINT_SPEED   = 10.0        # mm/s  (low speed for bridging)
+PRINT_SPEED   = 5.0         # mm/s  (low speed for bridging)
 TRAVEL_SPEED  = 100.0       # mm/s
 NOZZLE_TEMP   = 220         # °C
 BED_TEMP      = 60          # °C
@@ -137,7 +137,7 @@ for i in range(1, len(xs)):
         if label in ('Bottom ring', 'Top ring'):
             c('M221 S100              ; Flow 100% (ring)')
         else:
-            c('M221 S80               ; Flow 80% (mesh/bridge)')
+            c('M221 S70               ; Flow 70% (mesh/bridge)')
         sec_idx += 1
 
     dx = xs[i] - xs[i-1]

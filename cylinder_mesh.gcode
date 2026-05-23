@@ -4,7 +4,7 @@
 ; Cylinder:  φ50.0mm × H50.0mm
 ; Nozzle:    1.8mm    Filament: 1.75mm
 ; Material:  PLA   Nozzle 220°C  Bed 60°C
-; Speed:     10.0mm/s (600mm/min)
+; Speed:     5.0mm/s (300mm/min)
 ; Center:    X210.0 Y210.0
 ; E/mm ring: 0.8980  E/mm mesh: 1.2348
 ; ============================================
@@ -24,7 +24,7 @@ M106 S255              ; Fan 100% (critical for bridging)
 G1 Z10 F6000           ; Safety lift
 G1 X235.000 Y210.000 F6000  ; Move to start XY
 G1 Z1.200 F3000       ; Lower to start Z
-G1 F600                ; Set print speed
+G1 F300                ; Set print speed
 
 ; --- Bottom ring ---
 G1 X235.000 Y210.000 Z1.200  ; Start point (no extrusion)
@@ -228,7 +228,7 @@ G1 X234.950 Y208.422 Z1.200 E0.70882
 G1 X234.988 Y209.211 Z1.200 E0.70882
 G1 X235.000 Y210.000 Z1.200 E0.70882
 ; --- 0th pre-rev ---
-M221 S80               ; Flow 80% (mesh/bridge)
+M221 S70               ; Flow 70% (mesh/bridge)
 G1 X235.000 Y210.000 Z1.500 E0.37043
 G1 X234.988 Y210.789 Z1.242 E1.02556
 G1 X234.950 Y211.578 Z1.200 E0.97598
@@ -430,7 +430,7 @@ G1 X234.950 Y208.422 Z2.173 E1.50551
 G1 X234.988 Y209.211 Z1.458 E1.31498
 G1 X235.000 Y210.000 Z1.200 E1.02556
 ; --- Mesh ---
-M221 S80               ; Flow 80% (mesh/bridge)
+M221 S70               ; Flow 70% (mesh/bridge)
 G1 X234.988 Y210.786 Z1.486 E1.03240
 G1 X234.951 Y211.570 Z2.225 E1.33198
 G1 X234.889 Y212.353 Z3.180 E1.52633
@@ -3431,7 +3431,7 @@ G1 X234.951 Y208.430 Z48.475 E1.52633
 G1 X234.988 Y209.214 Z49.214 E1.33198
 G1 X235.000 Y210.000 Z49.500 E1.03240
 ; --- Top pre-rev ---
-M221 S80               ; Flow 80% (mesh/bridge)
+M221 S70               ; Flow 70% (mesh/bridge)
 G1 X234.988 Y210.789 Z49.242 E1.02556
 G1 X234.950 Y211.578 Z48.527 E1.31498
 G1 X234.888 Y212.364 Z47.597 E1.50551
@@ -3632,7 +3632,7 @@ G1 X234.950 Y208.422 Z50.000 E0.97463
 G1 X234.988 Y209.211 Z49.458 E1.18194
 G1 X235.000 Y210.000 Z49.200 E1.02556
 ; --- Ramp ---
-M221 S80               ; Flow 80% (mesh/bridge)
+M221 S70               ; Flow 70% (mesh/bridge)
 G1 X234.987 Y210.801 Z49.216 E0.98975
 G1 X234.949 Y211.602 Z49.233 E0.98975
 G1 X234.884 Y212.401 Z49.249 E0.98975
