@@ -7,7 +7,7 @@ NOZZLE_DIA    = 1.8    # mm
 CIRCLE_DIA    = 50.0   # mm
 TOTAL_HEIGHT  = 50.0   # mm
 LAYER_HEIGHT  = 6.0    # mm  (Z advance per revolution)
-N_OSC_PER_REV = 9.0   # oscillations per revolution (half-integer → diamond mesh)
+N_OSC_PER_REV = 9.5   # oscillations per revolution (half-integer → diamond mesh)
 # --------------------
 
 R      = CIRCLE_DIA / 2
