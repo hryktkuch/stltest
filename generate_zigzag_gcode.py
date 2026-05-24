@@ -25,7 +25,7 @@ PTS_PER_REV   = 200
 # ---- Extrusion rates ----
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
 E_RING = (NOZZLE_DIA * RING_HEIGHT)  / filament_area
-E_MESH = (NOZZLE_DIA * Z_AMP)        / filament_area
+E_MESH = np.pi * (NOZZLE_DIA / 2)**2 / filament_area  # circular cross-section for mid-air strand
 
 F_PRINT  = int(PRINT_SPEED  * 60)
 F_RING   = int(10.0 * 60)          # 10 mm/s for bottom/top rings
