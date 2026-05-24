@@ -126,21 +126,32 @@ for ri, z in enumerate(Z_VALUES):
         c(f'G1 E-3 F600')                         # retract
         c('G92 E0')
 
-        # --- Ring ---
-        t  = np.linspace(0, 2 * np.pi, PTS)
+        # --- Ring (radial approach + overlap) ---
+        APPROACH = 8.0          # mm: approach from outside ring to prime pressure
+        OVERLAP_RAD = 0.15      # rad ≈ 8°: overlap past 360° to cover seam
+        # Approach start: R+APPROACH mm outside ring at angle=0
+        ax = cx + RING_R + APPROACH
+        ay = cy
+        c('; Ring (radial approach + overlap)')
+        c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
+        c(f'G1 X{ax:.3f} Y{ay:.3f} F{F_TRAVEL}')
+        c(f'G1 Z{z:.3f} F{F_TRAVEL // 2}')
+        c('G1 E3 F300')                                       # un-retract
+        # Approach inward: (cx+R+8) → (cx+R), builds pressure before ring
+        c(f'G1 X{cx + RING_R:.3f} Y{cy:.3f} E{APPROACH * er:.5f} F{f}')
+        # Ring 360° + overlap
+        t  = np.linspace(0, 2 * np.pi + OVERLAP_RAD, PTS)
         xs = cx + RING_R * np.cos(t)
         ys = cy + RING_R * np.sin(t)
-        c('; Ring')
-        travel_to(xs[0], ys[0], z_lift, z)
-        c('G1 E3 F300')
-        c(f'G1 F{f}')
-        for i in range(1, len(xs)):
-            dx  = xs[i] - xs[i-1]
-            dy  = ys[i] - ys[i-1]
+        prev_x, prev_y = cx + RING_R, cy
+        for i in range(len(xs)):
+            dx  = xs[i] - prev_x
+            dy  = ys[i] - prev_y
             seg = np.sqrt(dx*dx + dy*dy)
             if seg < 0.001:
                 continue
             c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{z:.3f} E{seg*er:.5f}')
+            prev_x, prev_y = xs[i], ys[i]
         c(f'G1 E-3 F600')
         c('G92 E0')
         c('')
