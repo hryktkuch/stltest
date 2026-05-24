@@ -66,12 +66,14 @@ MINI_PURGE_GAP = 12.0  # mm: gap between purge line bottom and ring bottom
 SPEED_VALS = [0.5, 1.5, 4.5]    # Factor A: mm/s (rows)
 DWELL_VALS = [1500, 3000, 6000]  # Factor B: ms
 
+# ---- Selected combos for this run ----
+# Full 3x3: [(sp, dw) for sp in SPEED_VALS for dw in DWELL_VALS]
+# Unit 4 = (1.5, 1500), Unit 7 = (4.5, 1500)
+COMBOS = [(1.5, 1500), (4.5, 1500)]
+
 # ---- Grid: single column along Y axis ----
 CX_CENTER = 150          # fixed X for all units
-CY_START  = 48           # Y of first unit center
-CY_STEP   = 42           # mm: spacing between unit centers
-COMBOS = [(sp, dw) for sp in SPEED_VALS for dw in DWELL_VALS]  # 9 combos
-CY_LIST = [CY_START + i * CY_STEP for i in range(len(COMBOS))]
+CY_LIST   = [100, 300]   # mm: manually set for sufficient spacing (170mm gap between outer edges)
 
 # ---- Helpers ----
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
