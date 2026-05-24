@@ -30,8 +30,6 @@ G1 Z1.0 F3000          ; Lower
 G92 E0                 ; Reset extruder
 G1 X130 E40 F600       ; Purge line (10mm/s)
 G1 X150 F5000          ; Wipe
-G1 E-4 F300            ; Retract to prevent ooze
-G1 Z10 F3000           ; Lift before travel
 G92 E0                 ; Reset extruder
 
 ; --- Bottom ring ---

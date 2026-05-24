@@ -100,8 +100,6 @@ c('G1 Z1.0 F3000          ; Lower')
 c('G92 E0                 ; Reset extruder')
 c('G1 X130 E40 F600       ; Purge line (10mm/s)')
 c('G1 X150 F5000          ; Wipe')
-c('G1 E-4 F300            ; Retract to prevent ooze')
-c('G1 Z10 F3000           ; Lift before travel')
 c('G92 E0                 ; Reset extruder')
 c('')
 
