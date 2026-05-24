@@ -44,7 +44,7 @@ N_RINGS       = 2      # concentric rings printed inner→outer; 1 = single ring
 RING_DWELL_MS = 5000   # ms: cooling dwell after all rings before mesh starts
 
 # ---- Fixed mesh geometry ----
-N_OSC_PER_REV = 12
+N_OSC_PER_REV = 8
 OVERLAP        = 1.0   # mm: layer-to-layer embedding
 CIRCLE_DIA     = 30.0  # mm
 RING_R         = CIRCLE_DIA / 2
