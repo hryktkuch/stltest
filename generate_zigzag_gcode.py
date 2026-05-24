@@ -4,7 +4,7 @@ import numpy as np
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 RING_HEIGHT   = 1.2
-N_LAYERS      = 6
+N_LAYERS      = 8
 LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8 mm
 N_OSC_PER_REV = 8
 OVERLAP       = 1.0
