@@ -55,7 +55,7 @@ Z_AMP          = (LAYER_HEIGHT + OVERLAP) / 2
 
 # ---- Fixed process ----
 FLOW_RING      = 100   # M221 %
-FLOW_MESH      = 50    # M221 %
+FLOW_MESH      = 100   # M221 %
 PTS            = 200
 
 # ---- Mini purge geometry ----
@@ -69,11 +69,11 @@ DWELL_VALS = [1500, 3000, 6000]  # Factor B: ms
 # ---- Selected combos for this run ----
 # Full 3x3: [(sp, dw) for sp in SPEED_VALS for dw in DWELL_VALS]
 # Unit 4 = (1.5, 1500), Unit 7 = (4.5, 1500)
-COMBOS = [(0.5, 3000), (0.5, 6000)]
+COMBOS = [(1.5, 3000)]
 
 # ---- Grid: single column along Y axis ----
 CX_CENTER = 150          # fixed X for all units
-CY_LIST   = [100, 300]   # mm: manually set for sufficient spacing (170mm gap between outer edges)
+CY_LIST   = [200]        # mm: center of bed
 
 # ---- Helpers ----
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
