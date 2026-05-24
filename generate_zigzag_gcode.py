@@ -3,7 +3,7 @@ import numpy as np
 # ---- Shape Parameters ----
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
-RING_HEIGHT   = 1.2
+RING_HEIGHT   = 0.8
 N_LAYERS      = 8
 LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8 mm
 N_OSC_PER_REV = 12
