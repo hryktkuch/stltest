@@ -15,18 +15,18 @@
 M104 S200          ; Nozzle preheat
 M140 S60             ; Bed preheat
 G28                    ; Home all
+M106 S0                ; Fan OFF (ensure off regardless of previous print)
 M109 S200          ; Wait nozzle temp
 M190 S60             ; Wait bed temp
 G21                    ; Units mm
 G90                    ; Absolute XYZ
 M83                    ; Relative extrusion
 G92 E0                 ; Reset extruder
-; Fan OFF during purge and rings for adhesion
 
 ; --- Purge line ---
 G1 Z5 F3000            ; Lift
-G1 X30 Y10 F6000       ; Move to purge start
-G1 Z1.0 F3000          ; Lower
+G1 X30 Y30 F6000       ; Move to purge start (Y30: away from bed edge)
+G1 Z0.3 F3000          ; Lower to 0.3mm for adhesion
 G92 E0                 ; Reset extruder
 G1 X130 E40 F600       ; Purge line (10mm/s)
 G1 X150 F5000          ; Wipe
