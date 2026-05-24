@@ -21,7 +21,7 @@ G21                    ; Units mm
 G90                    ; Absolute XYZ
 M83                    ; Relative extrusion
 G92 E0                 ; Reset extruder
-M106 S255              ; Fan 100%
+; Fan OFF during purge and rings for adhesion
 
 ; --- Purge line ---
 G1 Z5 F3000            ; Lift
@@ -239,6 +239,7 @@ G1 X224.933 Y208.581 Z1.200 E0.42529
 G1 X224.970 Y209.053 Z1.200 E0.42529
 G1 X224.993 Y209.526 Z1.200 E0.42529
 G1 X225.000 Y210.000 Z1.200 E0.42529
+M106 S255              ; Fan 100% for air printing
 ; --- Mesh layer 1/8 ---
 M221 S50
 G1 E-4 F300            ; Retract

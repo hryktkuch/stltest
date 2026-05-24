@@ -91,7 +91,7 @@ c('G21                    ; Units mm')
 c('G90                    ; Absolute XYZ')
 c('M83                    ; Relative extrusion')
 c('G92 E0                 ; Reset extruder')
-c('M106 S255              ; Fan 100%')
+c('; Fan OFF during purge and rings for adhesion')
 c('')
 c('; --- Purge line ---')
 c('G1 Z5 F3000            ; Lift')
@@ -131,7 +131,8 @@ def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None, apexes=None):
 xs, ys, zs = make_ring(RING_HEIGHT)
 emit_path(xs, ys, zs, E_RING, 'Bottom ring', 100, f_print=F_RING)
 
-# Zigzag layers
+# Zigzag layers — turn fan on just before mesh printing starts
+c('M106 S255              ; Fan 100% for air printing')
 for n in range(N_LAYERS):
     xs, ys, zs, apexes = make_layer(n)
     emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 50, apexes=apexes)
