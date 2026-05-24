@@ -28,7 +28,7 @@ G1 Z5 F3000            ; Lift
 G1 X5 Y10 F6000        ; Move to purge start
 G1 Z1.0 F3000          ; Lower
 G92 E0                 ; Reset extruder
-G1 X100 E20 F600       ; Purge line (10mm/s)
+G1 X100 E40 F600       ; Purge line (10mm/s)
 G1 X120 F5000          ; Wipe
 G92 E0                 ; Reset extruder
 
