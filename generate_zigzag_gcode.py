@@ -51,6 +51,9 @@ def make_layer(n):
     x = BED_CX + R * np.cos(t)
     y = BED_CY + R * np.sin(t)
     z = z_mid + Z_AMP * triangle_wave(N_OSC_PER_REV * t + phase_n)
+    # First layer: clip valleys to RING_HEIGHT so nozzle never digs into the ring
+    if n == 0:
+        z = np.maximum(z, RING_HEIGHT)
     # Detect apexes (peaks and valleys) by sign change of dz
     dz = np.diff(z)
     is_apex = np.zeros(len(t), dtype=bool)
