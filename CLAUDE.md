@@ -72,15 +72,32 @@ PRINT_SPEED   = 5.0    # mm/s
 
 #### 現在のパラメータ
 
-```python
-CIRCLE_DIA    = 30.0
-TOTAL_HEIGHT  = 30.0
-LAYER_HEIGHT  = 5.0
-N_OSC_PER_REV = 8      # 整数OK（層ごと独立なので位相を明示設定）
-OVERLAP       = 1.0    # mm
-Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # = 3.0mm
-N_LAYERS      = 6
-```
+**能動パラメータ（ユーザーが決める値）**
+
+| パラメータ | 値 | 意味 |
+|---|---|---|
+| `CIRCLE_DIA` | 30.0 mm | 円筒の直径 |
+| `TOTAL_HEIGHT` | 30.0 mm | 円筒の全高 |
+| `RING_HEIGHT` | 1.2 mm | 底面・上面リングの高さ（平面ベタ印刷） |
+| `N_LAYERS` | 6 | ジグザグ層の数 |
+| `N_OSC_PER_REV` | 8 | 1周あたりのジグザグ往復回数（整数必須） |
+| `OVERLAP` | 1.0 mm | 隣接層へのめり込み量（接触保証マージン） |
+| `NOZZLE_DIA` | 1.8 mm | ノズル径（押出し幅の基準） |
+| `FILAMENT_DIA` | 1.75 mm | フィラメント径（E値計算に使用） |
+| `PRINT_SPEED` | 2.5 mm/s | 印刷速度 |
+| `NOZZLE_TEMP` | 220 °C | ノズル温度 |
+| `BED_TEMP` | 60 °C | ベッド温度 |
+
+**重要な受動パラメータ（自動計算・参照用）**
+
+| パラメータ | 値 | 計算式 |
+|---|---|---|
+| `LAYER_HEIGHT` | 4.8 mm | `(TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS` |
+| `Z_AMP` | 2.9 mm | `(LAYER_HEIGHT + OVERLAP) / 2` |
+| ジグザグ傾斜角 | **44.56°** | `arctan(2×Z_AMP / (πD / N_OSC_PER_REV))` |
+
+> ジグザグ傾斜角がほぼ45°のとき、上がり線と下がり線がほぼ直角に交差するダイヤモンド格子になる。
+> `OVERLAP` や `N_OSC_PER_REV` を変えるとこの角度が変わる。
 
 #### 位相設定
 
