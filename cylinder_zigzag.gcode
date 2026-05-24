@@ -26,7 +26,7 @@ G92 E0                 ; Reset extruder
 ; --- Purge line ---
 G1 Z10 F3000           ; Lift
 G1 X20 Y50 F6000       ; Move to purge start
-G1 Z0.3 F2000          ; Lower slowly to 0.3mm
+G1 Z0.8 F2000          ; Lower to 0.8mm (44% of 1.8mm nozzle dia)
 G92 E0                 ; Reset extruder
 G1 E10 F100            ; Slow prime: clear cold plug at nozzle tip
 G1 X160 E55 F400       ; Purge line (6.7mm/s, 140mm long)
