@@ -43,7 +43,10 @@ def make_ring(z_val):
 def make_layer(n):
     z_mid   = RING_HEIGHT + (n + 0.5) * LAYER_HEIGHT
     phase_n = -np.pi / 2 + n * np.pi
-    t = np.linspace(0, 2 * np.pi, PTS_PER_REV)
+    # Odd layers offset by half-oscillation so they start above the previous layer's peak.
+    # Without this, odd layers start above the previous layer's valley → mid-air printing.
+    t_offset = (n % 2) * np.pi / (2 * N_OSC_PER_REV)
+    t = np.linspace(t_offset, t_offset + 2 * np.pi, PTS_PER_REV)
     x = BED_CX + R * np.cos(t)
     y = BED_CY + R * np.sin(t)
     z = z_mid + Z_AMP * triangle_wave(N_OSC_PER_REV * t + phase_n)
