@@ -54,11 +54,13 @@ def make_layer(n):
     # First layer: clip valleys to RING_HEIGHT so nozzle never digs into the ring
     if n == 0:
         z = np.maximum(z, RING_HEIGHT)
-    # Detect apexes (peaks and valleys) by sign change of dz
+    # Detect apexes: peak = was rising, now flat/falling; valley = was falling, now flat/rising
     dz = np.diff(z)
     is_apex = np.zeros(len(t), dtype=bool)
     for i in range(1, len(dz)):
-        if dz[i-1] * dz[i] < 0:
+        if dz[i-1] > 0 and dz[i] <= 0:   # peak
+            is_apex[i] = True
+        elif dz[i-1] < 0 and dz[i] >= 0:  # valley (including clipped flat entry)
             is_apex[i] = True
     return x, y, z, is_apex
 
