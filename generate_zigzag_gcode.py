@@ -129,7 +129,7 @@ emit_path(xs, ys, zs, E_RING, 'Bottom ring', 100, f_print=F_RING)
 # Zigzag layers
 for n in range(N_LAYERS):
     xs, ys, zs, apexes = make_layer(n)
-    emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 70, apexes=apexes)
+    emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 50, apexes=apexes)
 
 # Top ring (10 mm/s)
 xs, ys, zs = make_ring(TOTAL_HEIGHT)
