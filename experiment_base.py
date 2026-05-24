@@ -29,12 +29,12 @@ PTS          = 200
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
 
 # ---- Experimental factors ----
-Z_VALUES     = [0.6, 0.8, 1.0]   # rows (Y increases)
+Z_VALUES     = [0.6, 0.8, 1.0, 1.2]   # rows (Y increases)
 SPEED_VALUES = [5,   10,  15 ]   # cols (X increases)  mm/s
 
 # ---- Grid centers ----
 CX = [70, 150, 230]   # X centers per speed column
-CY = [70, 160, 250]   # Y centers per Z row
+CY = [70, 160, 250, 340]   # Y centers per Z row
 
 # ---- Helpers ----
 def e_rate(z):
