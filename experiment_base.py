@@ -31,8 +31,14 @@ BED_TEMP     = 60
 F_TRAVEL     = 6000
 RING_R       = 15.0
 PTS          = 200
-APPROACH_MM  = 8.0    # mm, radial approach length when approach=True
-OVERLAP_RAD  = 0.14   # rad ≈ 8°, extra arc when overlap=True
+
+# ---- Values for factor levels (change here to test different amounts) ----
+APPROACH_MM  = 8.0    # mm: radial approach distance (Factor C = True)
+OVERLAP_RAD  = 0.14   # rad ≈ 8°: extra arc past 360° (Factor D = True)
+
+# ---- Mini purge per unit ----
+MINI_PURGE_LEN = 30.0   # mm: length of mini purge line before each ring
+MINI_PURGE_GAP = 12.0   # mm: clearance between purge line and ring bottom
 
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
 
@@ -131,9 +137,9 @@ for ri, (z, approach) in enumerate(ROW_COMBOS):
         c(f'; ============================================================')
 
         # Mini purge (30mm line below ring)
-        px0 = cx - 15.0
-        px1 = cx + 15.0
-        py  = cy - RING_R - 12
+        px0 = cx - MINI_PURGE_LEN / 2
+        px1 = cx + MINI_PURGE_LEN / 2
+        py  = cy - RING_R - MINI_PURGE_GAP
         c('; Mini purge')
         c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
         c(f'G1 X{px0:.1f} Y{py:.1f} F{F_TRAVEL}')
