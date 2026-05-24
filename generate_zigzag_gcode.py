@@ -4,9 +4,9 @@ import numpy as np
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 RING_HEIGHT   = 1.2
-N_LAYERS      = 3
-LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 9.6 mm
-N_OSC_PER_REV = 4
+N_LAYERS      = 6
+LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8 mm
+N_OSC_PER_REV = 8
 OVERLAP       = 1.0
 Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2              # 2.9 mm
 R             = CIRCLE_DIA / 2
@@ -89,6 +89,15 @@ c('G90                    ; Absolute XYZ')
 c('M83                    ; Relative extrusion')
 c('G92 E0                 ; Reset extruder')
 c('M106 S255              ; Fan 100%')
+c('')
+c('; --- Purge line ---')
+c('G1 Z5 F3000            ; Lift')
+c('G1 X5 Y10 F6000        ; Move to purge start')
+c('G1 Z1.0 F3000          ; Lower')
+c('G92 E0                 ; Reset extruder')
+c('G1 X100 E20 F600       ; Purge line (10mm/s)')
+c('G1 X120 F5000          ; Wipe')
+c('G92 E0                 ; Reset extruder')
 c('')
 
 def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None, apexes=None):
