@@ -1,73 +1,93 @@
 """
-Phase 1 experiment: ring base adhesion
-Factor A (Y / rows): nozzle Z = ring bead height
-Factor B (X / cols): print speed
+Phase 1b experiment: ring base adhesion — 2×2×2×2 = 16 combos
 
-Layout on 400×400mm bed:
+Factor A (Z):        0.6 / 0.8 mm
+Factor B (Speed):    10  / 15  mm/s
+Factor C (Approach): なし / あり  (8mm radial approach before ring start)
+Factor D (Overlap):  なし / あり  (360°+8° to cover seam)
 
-          Speed 5mm/s   Speed 10mm/s  Speed 15mm/s
-Z=1.0mm  [3,1] X70      [3,2] X150    [3,3] X230
-Z=0.8mm  [2,1] X70      [2,2] X150    [2,3] X230
-Z=0.6mm  [1,1] X70      [1,2] X150    [1,3] X230
-          Y=70           Y=70          Y=70
-(row 1 at Y=70, row 2 at Y=160, row 3 at Y=250)
+Grid layout (4 cols × 4 rows):
 
-Each unit: 30mm mini-purge line below ring, then φ30mm ring.
+                 Speed=10     Speed=10     Speed=15     Speed=15
+                 Overlap=N    Overlap=Y    Overlap=N    Overlap=Y
+Z=0.8,App=Y  →  [4,1]        [4,2]        [4,3]        [4,4]
+Z=0.8,App=N  →  [3,1]        [3,2]        [3,3]        [3,4]
+Z=0.6,App=Y  →  [2,1]        [2,2]        [2,3]        [2,4]
+Z=0.6,App=N  →  [1,1]        [1,2]        [1,3]        [1,4]
+
+Ring centers:
+  Cols (X): 70, 150, 250, 330
+  Rows (Y): 70, 160, 250, 340
 """
 
 import numpy as np
+from itertools import product
 
-# ---- Fixed ----
+# ---- Fixed printer settings ----
 NOZZLE_DIA   = 1.8
 FILAMENT_DIA = 1.75
 NOZZLE_TEMP  = 200
 BED_TEMP     = 60
 F_TRAVEL     = 6000
-RING_R       = 15.0     # φ30mm
+RING_R       = 15.0
 PTS          = 200
+APPROACH_MM  = 8.0    # mm, radial approach length when approach=True
+OVERLAP_RAD  = 0.14   # rad ≈ 8°, extra arc when overlap=True
 
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
 
-# ---- Experimental factors ----
-Z_VALUES     = [0.6, 0.8, 1.0, 1.2]   # rows (Y increases)
-SPEED_VALUES = [5,   10,  15 ]   # cols (X increases)  mm/s
-
-# ---- Grid centers ----
-CX = [70, 150, 230]   # X centers per speed column
-CY = [70, 160, 250, 340]   # Y centers per Z row
-
-# ---- Helpers ----
 def e_rate(z):
-    """E value per mm of travel for a rectangular bead NOZZLE_DIA × z."""
     return NOZZLE_DIA * z / filament_area
 
+# ---- Experimental factors ----
+# Each factor: (label, values)
+Z_VALS       = [0.6, 0.8]    # Factor A — rows pair
+SPEED_VALS   = [10,  15 ]    # Factor B — cols pair
+APPROACH_VALS= [False, True] # Factor C — rows pair (inner)
+OVERLAP_VALS = [False, True] # Factor D — cols pair (inner)
+
+# Row index = (Z, Approach) in order:
+#   row 0: Z=0.6, App=N
+#   row 1: Z=0.6, App=Y
+#   row 2: Z=0.8, App=N
+#   row 3: Z=0.8, App=Y
+ROW_COMBOS = [(z, app) for z in Z_VALS for app in APPROACH_VALS]
+
+# Col index = (Speed, Overlap):
+#   col 0: Speed=10, Ov=N
+#   col 1: Speed=10, Ov=Y
+#   col 2: Speed=15, Ov=N
+#   col 3: Speed=15, Ov=Y
+COL_COMBOS = [(sp, ov) for sp in SPEED_VALS for ov in OVERLAP_VALS]
+
+CX = [70, 150, 250, 330]   # X centers per column
+CY = [70, 160, 250, 340]   # Y centers per row
+
+# ---- G-code builder ----
 lines = []
 def c(s): lines.append(s)
 
-# ==================================================
-# Header / map
-# ==================================================
+# ---- Header ----
 c('; ==================================================')
-c('; Ring Base Adhesion Experiment — Phase 1')
+c('; Ring Base Adhesion Experiment — Phase 1b')
+c('; 2×2×2×2 = 16 combinations')
 c('; ==================================================')
-c('; Factor A rows (Y): Z height')
-c('; Factor B cols (X): print speed')
+c('; Factor A: Z height    = 0.6 / 0.8 mm')
+c('; Factor B: Speed       = 10  / 15  mm/s')
+c('; Factor C: Approach    = N / Y  (8mm radial approach)')
+c('; Factor D: Overlap     = N / Y  (360°+8° seam coverage)')
 c(';')
-c('; Grid map (ring center positions):')
-c(';         Speed=5      Speed=10     Speed=15  mm/s')
-for ri, z in reversed(list(enumerate(Z_VALUES))):
-    row_str = f'; Z={z}mm  '
-    for ci, sp in enumerate(SPEED_VALUES):
-        row_str += f' [{ri+1},{ci+1}]X{CX[ci]}Y{CY[ri]}  '
+c('; Grid map:')
+c(';              Sp=10,Ov=N  Sp=10,Ov=Y  Sp=15,Ov=N  Sp=15,Ov=Y')
+for ri, (z, app) in reversed(list(enumerate(ROW_COMBOS))):
+    row_str = f'; Z={z},App={"Y" if app else "N"}  '
+    for ci in range(len(COL_COMBOS)):
+        row_str += f'[{ri+1},{ci+1}]X{CX[ci]}Y{CY[ri]}   '
     c(row_str)
-c(';')
-c('; Each unit: mini-purge line (30mm) then ring (φ30mm)')
 c('; ==================================================')
 c('')
 
-# ==================================================
-# Start sequence
-# ==================================================
+# ---- Start sequence ----
 c(f'M104 S{NOZZLE_TEMP}')
 c(f'M140 S{BED_TEMP}')
 c('G28')
@@ -80,8 +100,8 @@ c('M83')
 c('G92 E0')
 c('')
 
-# Initial nozzle purge (before the grid)
-c('; --- Initial purge (prime nozzle before grid) ---')
+# Initial purge
+c('; --- Initial purge ---')
 c('G1 Z10 F3000')
 c('G1 X20 Y20 F6000')
 c('G1 Z0.8 F2000')
@@ -93,57 +113,62 @@ c('G1 E-5 F600')
 c('G92 E0')
 c('')
 
-# ==================================================
-# Grid
-# ==================================================
-def travel_to(x, y, z_lift, z_land):
-    c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
-    c(f'G1 X{x:.3f} Y{y:.3f} F{F_TRAVEL}')
-    c(f'G1 Z{z_land:.3f} F{F_TRAVEL // 2}')
-
-for ri, z in enumerate(Z_VALUES):
-    for ci, speed in enumerate(SPEED_VALUES):
-        cx  = CX[ci]
-        cy  = CY[ri]
-        er  = e_rate(z)
-        f   = int(speed * 60)
+# ---- Grid ----
+for ri, (z, approach) in enumerate(ROW_COMBOS):
+    for ci, (speed, overlap) in enumerate(COL_COMBOS):
+        cx     = CX[ci]
+        cy     = CY[ri]
+        er     = e_rate(z)
+        f      = int(speed * 60)
         z_lift = z + 3.0
 
+        app_str = 'Y' if approach else 'N'
+        ov_str  = 'Y' if overlap  else 'N'
         c(f'; ============================================================')
-        c(f'; [{ri+1},{ci+1}]  Z={z}mm  speed={speed}mm/s  E/mm={er:.4f}')
-        c(f'; Ring center: X{cx} Y{cy}')
+        c(f'; [{ri+1},{ci+1}]  Z={z}mm  speed={speed}mm/s'
+          f'  approach={app_str}  overlap={ov_str}')
+        c(f'; Center: X{cx} Y{cy}')
         c(f'; ============================================================')
 
-        # --- Mini purge line (30mm, centered below ring) ---
+        # Mini purge (30mm line below ring)
         px0 = cx - 15.0
         px1 = cx + 15.0
-        py  = cy - RING_R - 12   # 12mm clearance below ring
+        py  = cy - RING_R - 12
         c('; Mini purge')
-        travel_to(px0, py, z_lift, z)
+        c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
+        c(f'G1 X{px0:.1f} Y{py:.1f} F{F_TRAVEL}')
+        c(f'G1 Z{z:.2f} F2000')
         c('G92 E0')
-        c(f'G1 E3 F150')                          # slow initial prime
-        c(f'G1 X{px1:.1f} E{30*er:.4f} F{f}')    # purge stroke
-        c(f'G1 E-3 F600')                         # retract
+        c('G1 E3 F150')
+        c(f'G1 X{px1:.1f} E{30*er:.4f} F{f}')
+        c('G1 E-3 F600')
         c('G92 E0')
 
-        # --- Ring (radial approach + overlap) ---
-        APPROACH = 8.0          # mm: approach from outside ring to prime pressure
-        OVERLAP_RAD = 0.15      # rad ≈ 8°: overlap past 360° to cover seam
-        # Approach start: R+APPROACH mm outside ring at angle=0
-        ax = cx + RING_R + APPROACH
-        ay = cy
-        c('; Ring (radial approach + overlap)')
-        c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
-        c(f'G1 X{ax:.3f} Y{ay:.3f} F{F_TRAVEL}')
-        c(f'G1 Z{z:.3f} F{F_TRAVEL // 2}')
-        c('G1 E3 F300')                                       # un-retract
-        # Approach inward: (cx+R+8) → (cx+R), builds pressure before ring
-        c(f'G1 X{cx + RING_R:.3f} Y{cy:.3f} E{APPROACH * er:.5f} F{f}')
-        # Ring 360° + overlap
-        t  = np.linspace(0, 2 * np.pi + OVERLAP_RAD, PTS)
+        # Ring
+        c('; Ring')
+        if approach:
+            # Travel to R+APPROACH_MM outside ring, un-retract there
+            ax = cx + RING_R + APPROACH_MM
+            c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
+            c(f'G1 X{ax:.3f} Y{cy:.3f} F{F_TRAVEL}')
+            c(f'G1 Z{z:.3f} F{F_TRAVEL // 2}')
+            c('G1 E3 F300')
+            # Approach inward to ring start while extruding
+            c(f'G1 X{cx + RING_R:.3f} Y{cy:.3f} E{APPROACH_MM * er:.5f} F{f}')
+        else:
+            # Travel directly to ring start
+            c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
+            c(f'G1 X{cx + RING_R:.3f} Y{cy:.3f} F{F_TRAVEL}')
+            c(f'G1 Z{z:.3f} F{F_TRAVEL // 2}')
+            c('G1 E3 F300')
+
+        # Arc: 360° or 360°+overlap
+        end_angle = 2 * np.pi + (OVERLAP_RAD if overlap else 0.0)
+        t  = np.linspace(0, end_angle, PTS)
         xs = cx + RING_R * np.cos(t)
         ys = cy + RING_R * np.sin(t)
         prev_x, prev_y = cx + RING_R, cy
+        c(f'G1 F{f}')
         for i in range(len(xs)):
             dx  = xs[i] - prev_x
             dy  = ys[i] - prev_y
@@ -152,13 +177,12 @@ for ri, z in enumerate(Z_VALUES):
                 continue
             c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{z:.3f} E{seg*er:.5f}')
             prev_x, prev_y = xs[i], ys[i]
-        c(f'G1 E-3 F600')
+
+        c('G1 E-3 F600')
         c('G92 E0')
         c('')
 
-# ==================================================
-# End sequence
-# ==================================================
+# ---- End sequence ----
 c('; --- End ---')
 c('M106 S0')
 c('M104 S0')
@@ -176,22 +200,11 @@ print('Generated: experiment_base.gcode')
 print(f'  G1 moves : {n_g1}')
 print(f'  Lines    : {len(lines)}')
 print()
-print(f'Grid: {len(Z_VALUES)} Z values × {len(SPEED_VALUES)} speeds = {len(Z_VALUES)*len(SPEED_VALUES)} combos')
-print()
-print('Layout (ring centers):')
-print(f'{"":12}', end='')
-for sp in SPEED_VALUES:
-    print(f'Speed={sp:2d}mm/s    ', end='')
-print()
-for ri, z in reversed(list(enumerate(Z_VALUES))):
-    print(f'Z={z}mm      ', end='')
-    for ci in range(len(SPEED_VALUES)):
-        print(f'X{CX[ci]:3d} Y{CY[ri]:3d}       ', end='')
-    print()
-print()
-print('Estimated time (rings only, no dwell):')
-total_circ = 2 * np.pi * RING_R
-for ri, z in enumerate(Z_VALUES):
-    for ci, speed in enumerate(SPEED_VALUES):
-        t_ring = total_circ / speed
-        print(f'  [{ri+1},{ci+1}] Z={z}mm {speed}mm/s → {t_ring:.0f}s/ring')
+print('Grid map:')
+header = f'{"":18}' + ''.join(f'Sp={sp},Ov={"Y" if ov else "N"}  ' for sp, ov in COL_COMBOS)
+print(header)
+for ri, (z, app) in reversed(list(enumerate(ROW_COMBOS))):
+    row = f'Z={z},App={"Y" if app else "N"}  '
+    for ci in range(len(COL_COMBOS)):
+        row += f'  [{ri+1},{ci+1}]X{CX[ci]:3d}Y{CY[ri]:3d}  '
+    print(row)
