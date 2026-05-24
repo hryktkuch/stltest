@@ -95,11 +95,13 @@ c('M106 S255              ; Fan 100%')
 c('')
 c('; --- Purge line ---')
 c('G1 Z5 F3000            ; Lift')
-c('G1 X5 Y10 F6000        ; Move to purge start')
+c('G1 X30 Y10 F6000       ; Move to purge start')
 c('G1 Z1.0 F3000          ; Lower')
 c('G92 E0                 ; Reset extruder')
-c('G1 X100 E40 F600       ; Purge line (10mm/s)')
-c('G1 X120 F5000          ; Wipe')
+c('G1 X130 E40 F600       ; Purge line (10mm/s)')
+c('G1 X150 F5000          ; Wipe')
+c('G1 E-4 F300            ; Retract to prevent ooze')
+c('G1 Z10 F3000           ; Lift before travel')
 c('G92 E0                 ; Reset extruder')
 c('')
 
@@ -109,9 +111,11 @@ def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None, apexes=None):
     c(f'; --- {label} ---')
     c(f'M221 S{flow}')
     # Travel to start
+    c('G1 E-4 F300            ; Retract')
     c(f'G1 Z{zs[0]+5:.3f} F{F_TRAVEL}   ; Lift')
     c(f'G1 X{xs[0]:.3f} Y{ys[0]:.3f} F{F_TRAVEL}  ; Move to start')
     c(f'G1 Z{zs[0]:.3f} F{int(F_TRAVEL/2)}  ; Lower')
+    c('G1 E4 F300            ; Un-retract')
     c(f'G1 F{f_print}')
     for i in range(1, len(xs)):
         dx = xs[i] - xs[i-1]

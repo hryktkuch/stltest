@@ -25,18 +25,22 @@ M106 S255              ; Fan 100%
 
 ; --- Purge line ---
 G1 Z5 F3000            ; Lift
-G1 X5 Y10 F6000        ; Move to purge start
+G1 X30 Y10 F6000       ; Move to purge start
 G1 Z1.0 F3000          ; Lower
 G92 E0                 ; Reset extruder
-G1 X100 E40 F600       ; Purge line (10mm/s)
-G1 X120 F5000          ; Wipe
+G1 X130 E40 F600       ; Purge line (10mm/s)
+G1 X150 F5000          ; Wipe
+G1 E-4 F300            ; Retract to prevent ooze
+G1 Z10 F3000           ; Lift before travel
 G92 E0                 ; Reset extruder
 
 ; --- Bottom ring ---
 M221 S100
+G1 E-4 F300            ; Retract
 G1 Z6.200 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z1.200 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F600
 G1 X224.993 Y210.474 Z1.200 E0.42529
 G1 X224.970 Y210.947 Z1.200 E0.42529
@@ -239,9 +243,11 @@ G1 X224.993 Y209.526 Z1.200 E0.42529
 G1 X225.000 Y210.000 Z1.200 E0.42529
 ; --- Mesh layer 1/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z6.200 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z1.200 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.993 Y210.474 Z1.200 E0.50104
 G1 X224.970 Y210.947 Z1.440 E0.56156
@@ -452,9 +458,11 @@ G1 X224.993 Y209.526 Z1.200 E0.56156
 G1 X225.000 Y210.000 Z1.200 E0.50104
 ; --- Mesh layer 2/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z11.600 F6000   ; Lift
 G1 X224.712 Y212.926 F6000  ; Move to start
 G1 Z6.600 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.612 Y213.389 Z6.230 E0.63572
 G1 X224.498 Y213.849 Z5.860 E0.63572
@@ -673,9 +681,11 @@ G1 X224.797 Y212.460 Z6.970 E0.63572
 G1 X224.712 Y212.926 Z6.600 E0.63572
 ; --- Mesh layer 3/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z12.900 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z7.900 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.993 Y210.474 Z8.270 E0.63572
 G1 X224.970 Y210.947 Z8.640 E0.63572
@@ -893,9 +903,11 @@ G1 X224.993 Y209.526 Z8.270 E0.63572
 G1 X225.000 Y210.000 Z7.900 E0.63572
 ; --- Mesh layer 4/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z18.800 F6000   ; Lift
 G1 X224.712 Y212.926 F6000  ; Move to start
 G1 Z13.800 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.612 Y213.389 Z13.430 E0.63572
 G1 X224.498 Y213.849 Z13.060 E0.63572
@@ -1114,9 +1126,11 @@ G1 X224.797 Y212.460 Z14.170 E0.63572
 G1 X224.712 Y212.926 Z13.800 E0.63572
 ; --- Mesh layer 5/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z20.100 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z15.100 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.993 Y210.474 Z15.470 E0.63572
 G1 X224.970 Y210.947 Z15.840 E0.63572
@@ -1333,9 +1347,11 @@ G1 X224.993 Y209.526 Z15.470 E0.63572
 G1 X225.000 Y210.000 Z15.100 E0.63572
 ; --- Mesh layer 6/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z26.000 F6000   ; Lift
 G1 X224.712 Y212.926 F6000  ; Move to start
 G1 Z21.000 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.612 Y213.389 Z20.630 E0.63572
 G1 X224.498 Y213.849 Z20.260 E0.63572
@@ -1554,9 +1570,11 @@ G1 X224.797 Y212.460 Z21.370 E0.63572
 G1 X224.712 Y212.926 Z21.000 E0.63572
 ; --- Mesh layer 7/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z27.300 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z22.300 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.993 Y210.474 Z22.670 E0.63572
 G1 X224.970 Y210.947 Z23.040 E0.63572
@@ -1773,9 +1791,11 @@ G1 X224.993 Y209.526 Z22.670 E0.63572
 G1 X225.000 Y210.000 Z22.300 E0.63572
 ; --- Mesh layer 8/8 ---
 M221 S50
+G1 E-4 F300            ; Retract
 G1 Z33.200 F6000   ; Lift
 G1 X224.712 Y212.926 F6000  ; Move to start
 G1 Z28.200 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F100
 G1 X224.612 Y213.389 Z27.830 E0.63572
 G1 X224.498 Y213.849 Z27.460 E0.63572
@@ -1994,9 +2014,11 @@ G1 X224.797 Y212.460 Z28.570 E0.63572
 G1 X224.712 Y212.926 Z28.200 E0.63572
 ; --- Top ring ---
 M221 S100
+G1 E-4 F300            ; Retract
 G1 Z35.000 F6000   ; Lift
 G1 X225.000 Y210.000 F6000  ; Move to start
 G1 Z30.000 F3000  ; Lower
+G1 E4 F300            ; Un-retract
 G1 F600
 G1 X224.993 Y210.474 Z30.000 E0.42529
 G1 X224.970 Y210.947 Z30.000 E0.42529
