@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 LAYER_HEIGHT  = 5.0
-N_OSC_PER_REV = 9.5   # half-integer → phase inverts per layer → diamond mesh
+N_OSC_PER_REV = 8     # integer OK (phase per layer set explicitly) → seamless closed loop
 OVERLAP       = 1.0   # mm  peaks embed into adjacent layer by this amount
 Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # 3.0 mm
 
