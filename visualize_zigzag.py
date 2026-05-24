@@ -7,8 +7,8 @@ CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 LAYER_HEIGHT  = 5.0
 N_OSC_PER_REV = 9.5   # half-integer → phase inverts per layer → diamond mesh
-OVERLAP       = 0.0
-Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # 2.5 mm
+OVERLAP       = 1.0   # mm  peaks embed into adjacent layer by this amount
+Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # 3.0 mm
 
 R        = CIRCLE_DIA / 2   # 15 mm
 N_LAYERS = int(TOTAL_HEIGHT / LAYER_HEIGHT)  # 6
@@ -71,7 +71,7 @@ ax3.view_init(elev=22, azim=-55)
 ax3.legend(fontsize=8, loc='upper left')
 ax3.set_title(
     f'Zigzag mesh cylinder  (φ{CIRCLE_DIA}mm × H{TOTAL_HEIGHT}mm)\n'
-    f'layer {LAYER_HEIGHT}mm | {N_OSC_PER_REV} osc/rev | Z_AMP ±{Z_AMP}mm | {N_LAYERS} layers',
+    f'layer {LAYER_HEIGHT}mm | {N_OSC_PER_REV} osc/rev | Z_AMP ±{Z_AMP}mm | OVERLAP {OVERLAP}mm',
     fontsize=10)
 
 # ---- Unwrapped view ----
@@ -88,9 +88,15 @@ for n, (x, y, z) in enumerate(layers):
     col = cmap((n + 0.5) / N_LAYERS)
     ax2.plot(arc, z, color=col, lw=1.5, alpha=0.9, label=f'Layer {n+1}')
 
-# Layer boundary lines
+# Layer boundary lines + overlap zones
 for n in range(N_LAYERS + 1):
-    ax2.axhline(n * LAYER_HEIGHT, color='gray', lw=0.6, ls='--', alpha=0.4)
+    ax2.axhline(n * LAYER_HEIGHT, color='gray', lw=0.8, ls='--', alpha=0.5)
+# Overlap zones (where adjacent layers physically intersect)
+for n in range(1, N_LAYERS):
+    boundary = n * LAYER_HEIGHT
+    ax2.axhspan(boundary - OVERLAP/2, boundary + OVERLAP/2,
+                color='red', alpha=0.12, zorder=0)
+ax2.plot([], [], color='red', alpha=0.4, lw=6, label=f'Overlap zone (±{OVERLAP/2}mm)')
 
 ax2.set_xlim(0, circ)
 ax2.set_ylim(-1, TOTAL_HEIGHT + 1)
