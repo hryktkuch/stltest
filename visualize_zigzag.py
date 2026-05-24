@@ -6,13 +6,13 @@ from mpl_toolkits.mplot3d import Axes3D
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 RING_HEIGHT   = 1.2    # flat ring height (bottom & top)
-LAYER_HEIGHT  = 5.0
+N_LAYERS      = 6
+LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8mm (均等割り)
 N_OSC_PER_REV = 8      # integer OK (phase per layer set explicitly)
 OVERLAP       = 1.0    # mm  peaks embed into adjacent layer
-Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # 3.0 mm
+Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2  # 2.9 mm
 
-R        = CIRCLE_DIA / 2   # 15 mm
-N_LAYERS = int((TOTAL_HEIGHT - RING_HEIGHT) / LAYER_HEIGHT)  # 5
+R = CIRCLE_DIA / 2   # 15 mm
 PTS      = 1000
 
 def triangle_wave(x):
