@@ -103,6 +103,7 @@ c('G21')
 c('G90')
 c('M83')
 c('G92 E0')
+c('M221 S100              ; Reset flow rate')
 c('')
 
 # Initial purge
@@ -125,7 +126,7 @@ def emit_ring(cx, cy):
     z_lift = z + 3.0
     overlap_rad = np.deg2rad(OVERLAP_DEG)
 
-    c(f'; M221 S{FLOW_RING}')
+    c(f'M221 S{FLOW_RING}')
     # Travel to approach start
     ax = cx + RING_R + APPROACH_MM
     c(f'G1 Z{z_lift:.2f} F{F_TRAVEL}')
@@ -174,7 +175,7 @@ def emit_mesh_layer(cx, cy, print_speed, dwell_ms):
         elif dz[i-1] < 0 and dz[i] >= 0:
             is_apex[i] = True
 
-    c(f'; M221 S{FLOW_MESH}')
+    c(f'M221 S{FLOW_MESH}')
     # Travel to start
     c(f'G1 Z{z_lift:.3f} F{F_TRAVEL}')
     c(f'G1 X{xs[0]:.3f} Y{ys[0]:.3f} F{F_TRAVEL}')
