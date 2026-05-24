@@ -6,7 +6,7 @@ TOTAL_HEIGHT  = 30.0
 RING_HEIGHT   = 1.2
 N_LAYERS      = 6
 LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8 mm
-N_OSC_PER_REV = 8
+N_OSC_PER_REV = 12
 OVERLAP       = 1.0
 Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2              # 2.9 mm
 R             = CIRCLE_DIA / 2
@@ -51,7 +51,13 @@ def make_layer(n):
     x = BED_CX + R * np.cos(t)
     y = BED_CY + R * np.sin(t)
     z = z_mid + Z_AMP * triangle_wave(N_OSC_PER_REV * t + phase_n)
-    return x, y, z
+    # Detect apexes (peaks and valleys) by sign change of dz
+    dz = np.diff(z)
+    is_apex = np.zeros(len(t), dtype=bool)
+    for i in range(1, len(dz)):
+        if dz[i-1] * dz[i] < 0:
+            is_apex[i] = True
+    return x, y, z, is_apex
 
 # ==================================================
 # G-code output
@@ -85,7 +91,7 @@ c('G92 E0                 ; Reset extruder')
 c('M106 S255              ; Fan 100%')
 c('')
 
-def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None):
+def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None, apexes=None):
     if f_print is None:
         f_print = F_PRINT
     c(f'; --- {label} ---')
@@ -104,6 +110,8 @@ def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None):
             continue
         e_val = seg * e_rate
         c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{zs[i]:.3f} E{e_val:.5f}')
+        if apexes is not None and apexes[i]:
+            c('G4 P200               ; Dwell at apex')
 
 # Bottom ring (10 mm/s for bed adhesion)
 xs, ys, zs = make_ring(RING_HEIGHT)
@@ -111,8 +119,8 @@ emit_path(xs, ys, zs, E_RING, 'Bottom ring', 100, f_print=F_RING)
 
 # Zigzag layers
 for n in range(N_LAYERS):
-    xs, ys, zs = make_layer(n)
-    emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 70)
+    xs, ys, zs, apexes = make_layer(n)
+    emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 70, apexes=apexes)
 
 # Top ring (10 mm/s)
 xs, ys, zs = make_ring(TOTAL_HEIGHT)
@@ -139,4 +147,5 @@ print(f'  LAYER_HEIGHT: {LAYER_HEIGHT:.2f} mm')
 print(f'  Z_AMP       : ±{Z_AMP:.2f} mm')
 print(f'  E/mm ring   : {E_RING:.4f}')
 print(f'  E/mm mesh   : {E_MESH:.4f}')
-print(f'  Print time  : ~{sum(np.sqrt((make_layer(n)[0][1:]-make_layer(n)[0][:-1])**2 + (make_layer(n)[1][1:]-make_layer(n)[1][:-1])**2 + (make_layer(n)[2][1:]-make_layer(n)[2][:-1])**2).sum() for n in range(N_LAYERS)) / PRINT_SPEED / 60:.1f} min (mesh only)')
+print(f'  Print time  : ~{sum(np.sqrt((make_layer(n)[0][1:]-make_layer(n)[0][:-1])**2 + (make_layer(n)[1][1:]-make_layer(n)[1][:-1])**2 + (make_layer(n)[2][1:]-make_layer(n)[2][:-1])**2).sum() for n in range(N_LAYERS)) / PRINT_SPEED / 60:.1f} min (mesh only, excl. dwell)')
+print(f'  Dwell/layer : {2 * N_OSC_PER_REV} apexes × 200ms = {2 * N_OSC_PER_REV * 0.2:.1f}s  × {N_LAYERS} layers = {2 * N_OSC_PER_REV * 0.2 * N_LAYERS:.0f}s extra')
