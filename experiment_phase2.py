@@ -57,10 +57,9 @@ SPEED_VALS = [0.5, 1.5, 4.5]    # Factor A: mm/s (rows)
 DWELL_VALS = [1500, 3000, 6000]  # Factor B: ms
 
 # ---- Grid: single column along Y axis ----
-# All 9 combos stacked vertically: (Speed x Dwell) ordered row by row
 CX_CENTER = 150          # fixed X for all units
-CY_START  = 50           # Y of first unit center
-CY_STEP   = 40           # mm between unit centers
+CY_START  = 48           # Y of first unit center (purge at Y=21, ring top at Y=396)
+CY_STEP   = 42           # mm: minimum to avoid structure overlap (RING_R*2+PURGE_GAP)
 COMBOS = [(sp, dw) for sp in SPEED_VALS for dw in DWELL_VALS]  # 9 combos
 CY_LIST = [CY_START + i * CY_STEP for i in range(len(COMBOS))]
 
@@ -68,6 +67,10 @@ CY_LIST = [CY_START + i * CY_STEP for i in range(len(COMBOS))]
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
 E_RING = NOZZLE_DIA * RING_HEIGHT / filament_area
 E_MESH = np.pi * (NOZZLE_DIA / 2) ** 2 / filament_area
+
+# Safe travel Z: above mesh peak + margin
+Z_MESH_PEAK = RING_HEIGHT + 0.5 * LAYER_HEIGHT + Z_AMP  # ≈ 4.95mm
+Z_SAFE      = Z_MESH_PEAK + 5.0                          # ≈ 10mm
 
 def triangle_wave(x):
     return (2 / np.pi) * np.arcsin(np.sin(x))
@@ -124,7 +127,7 @@ def emit_ring(cx, cy):
     """Print base ring with Phase 1 confirmed parameters."""
     z     = RING_HEIGHT
     f_r   = int(RING_SPEED * 60)
-    z_lift = z + 3.0
+    z_lift = Z_SAFE
     overlap_rad = np.deg2rad(OVERLAP_DEG)
 
     c(f'M221 S{FLOW_RING}')
@@ -159,7 +162,7 @@ def emit_mesh_layer(cx, cy, print_speed, dwell_ms):
     phase_n = -np.pi / 2  # even layer: valley start
     t_offset = 0.0        # n=0: no offset
     f_m     = int(print_speed * 60)
-    z_lift  = z_mid + Z_AMP + 3.0
+    z_lift  = Z_SAFE
 
     t  = np.linspace(t_offset, t_offset + 2 * np.pi, PTS)
     xs = cx + RING_R * np.cos(t)
@@ -209,7 +212,7 @@ for i, (print_speed, dwell_ms) in enumerate(COMBOS):
         py  = cy - RING_R - 12
         f_r = int(RING_SPEED * 60)
         c('; Mini purge')
-        c(f'G1 Z{RING_HEIGHT + 3:.2f} F{F_TRAVEL}')
+        c(f'G1 Z{Z_SAFE:.2f} F{F_TRAVEL}')
         c(f'G1 X{px0:.1f} Y{py:.1f} F{F_TRAVEL}')
         c(f'G1 Z{RING_HEIGHT:.2f} F2000')
         c('G92 E0')
@@ -257,7 +260,7 @@ print()
 print(f'Geometry: N_OSC={N_OSC_PER_REV}  Span={np.pi*CIRCLE_DIA/N_OSC_PER_REV:.1f}mm'
       f'  Z_AMP=±{Z_AMP:.2f}mm  Angle={np.degrees(np.arctan(2*Z_AMP/(np.pi*CIRCLE_DIA/N_OSC_PER_REV))):.1f}°')
 print()
-print('Layout (single column X={CX_CENTER}):')
+print(f'Layout (single column X={CX_CENTER}):')
 print(f'  {"Unit":4}  {"Speed":10}  {"Dwell":8}  CenterY')
 for i, (sp, dw) in enumerate(COMBOS):
     print(f'  [{i+1:2d}]   {sp}mm/s      {dw}ms      Y={CY_LIST[i]}')
