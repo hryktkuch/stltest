@@ -14,9 +14,9 @@ R             = CIRCLE_DIA / 2
 # ---- Print Parameters ----
 NOZZLE_DIA    = 1.8
 FILAMENT_DIA  = 1.75
-PRINT_SPEED   = 2.5
+PRINT_SPEED   = 100 / 60  # 1.67 mm/s = F100 mm/min (ref: tbl_3axis_test)
 TRAVEL_SPEED  = 100.0
-NOZZLE_TEMP   = 220
+NOZZLE_TEMP   = 200       # ref: tbl_3axis_test
 BED_TEMP      = 60
 BED_CX        = 210.0
 BED_CY        = 210.0
