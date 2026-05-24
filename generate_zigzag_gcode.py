@@ -111,7 +111,7 @@ def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None, apexes=None):
         e_val = seg * e_rate
         c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{zs[i]:.3f} E{e_val:.5f}')
         if apexes is not None and apexes[i]:
-            c('G4 P200               ; Dwell at apex')
+            c('G4 P3000              ; Dwell at apex')
 
 # Bottom ring (10 mm/s for bed adhesion)
 xs, ys, zs = make_ring(RING_HEIGHT)
@@ -148,4 +148,5 @@ print(f'  Z_AMP       : ±{Z_AMP:.2f} mm')
 print(f'  E/mm ring   : {E_RING:.4f}')
 print(f'  E/mm mesh   : {E_MESH:.4f}')
 print(f'  Print time  : ~{sum(np.sqrt((make_layer(n)[0][1:]-make_layer(n)[0][:-1])**2 + (make_layer(n)[1][1:]-make_layer(n)[1][:-1])**2 + (make_layer(n)[2][1:]-make_layer(n)[2][:-1])**2).sum() for n in range(N_LAYERS)) / PRINT_SPEED / 60:.1f} min (mesh only, excl. dwell)')
-print(f'  Dwell/layer : {2 * N_OSC_PER_REV} apexes × 200ms = {2 * N_OSC_PER_REV * 0.2:.1f}s  × {N_LAYERS} layers = {2 * N_OSC_PER_REV * 0.2 * N_LAYERS:.0f}s extra')
+DWELL_MS = 3000
+print(f'  Dwell/layer : {2 * N_OSC_PER_REV} apexes × {DWELL_MS}ms = {2 * N_OSC_PER_REV * DWELL_MS/1000:.1f}s  × {N_LAYERS} layers = {2 * N_OSC_PER_REV * DWELL_MS/1000 * N_LAYERS:.0f}s extra')
