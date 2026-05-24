@@ -4,9 +4,9 @@ import numpy as np
 CIRCLE_DIA    = 30.0
 TOTAL_HEIGHT  = 30.0
 RING_HEIGHT   = 1.2
-N_LAYERS      = 6
-LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 4.8 mm
-N_OSC_PER_REV = 12
+N_LAYERS      = 3
+LAYER_HEIGHT  = (TOTAL_HEIGHT - RING_HEIGHT) / N_LAYERS  # 9.6 mm
+N_OSC_PER_REV = 4
 OVERLAP       = 1.0
 Z_AMP         = (LAYER_HEIGHT + OVERLAP) / 2              # 2.9 mm
 R             = CIRCLE_DIA / 2
