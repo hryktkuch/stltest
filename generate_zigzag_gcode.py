@@ -28,6 +28,7 @@ E_RING = (NOZZLE_DIA * RING_HEIGHT)  / filament_area
 E_MESH = (NOZZLE_DIA * Z_AMP)        / filament_area
 
 F_PRINT  = int(PRINT_SPEED  * 60)
+F_RING   = int(10.0 * 60)          # 10 mm/s for bottom/top rings
 F_TRAVEL = int(TRAVEL_SPEED * 60)
 
 def triangle_wave(x):
@@ -84,14 +85,16 @@ c('G92 E0                 ; Reset extruder')
 c('M106 S255              ; Fan 100%')
 c('')
 
-def emit_path(xs, ys, zs, e_rate, label, flow):
+def emit_path(xs, ys, zs, e_rate, label, flow, f_print=None):
+    if f_print is None:
+        f_print = F_PRINT
     c(f'; --- {label} ---')
     c(f'M221 S{flow}')
     # Travel to start
     c(f'G1 Z{zs[0]+5:.3f} F{F_TRAVEL}   ; Lift')
     c(f'G1 X{xs[0]:.3f} Y{ys[0]:.3f} F{F_TRAVEL}  ; Move to start')
     c(f'G1 Z{zs[0]:.3f} F{int(F_TRAVEL/2)}  ; Lower')
-    c(f'G1 F{F_PRINT}')
+    c(f'G1 F{f_print}')
     for i in range(1, len(xs)):
         dx = xs[i] - xs[i-1]
         dy = ys[i] - ys[i-1]
@@ -102,18 +105,18 @@ def emit_path(xs, ys, zs, e_rate, label, flow):
         e_val = seg * e_rate
         c(f'G1 X{xs[i]:.3f} Y{ys[i]:.3f} Z{zs[i]:.3f} E{e_val:.5f}')
 
-# Bottom ring
+# Bottom ring (10 mm/s for bed adhesion)
 xs, ys, zs = make_ring(RING_HEIGHT)
-emit_path(xs, ys, zs, E_RING, 'Bottom ring', 100)
+emit_path(xs, ys, zs, E_RING, 'Bottom ring', 100, f_print=F_RING)
 
 # Zigzag layers
 for n in range(N_LAYERS):
     xs, ys, zs = make_layer(n)
     emit_path(xs, ys, zs, E_MESH, f'Mesh layer {n+1}/{N_LAYERS}', 70)
 
-# Top ring
+# Top ring (10 mm/s)
 xs, ys, zs = make_ring(TOTAL_HEIGHT)
-emit_path(xs, ys, zs, E_RING, 'Top ring', 100)
+emit_path(xs, ys, zs, E_RING, 'Top ring', 100, f_print=F_RING)
 
 c('')
 c('; --- End sequence ---')
