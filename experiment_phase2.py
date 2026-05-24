@@ -54,11 +54,15 @@ PTS            = 200
 
 # ---- Experimental factors ----
 SPEED_VALS = [0.5, 1.5, 4.5]    # Factor A: mm/s (rows)
-DWELL_VALS = [1500, 3000, 6000]  # Factor B: ms   (cols)
+DWELL_VALS = [1500, 3000, 6000]  # Factor B: ms
 
-# ---- Grid centers ----
-CX = [60,  150, 240]   # X per dwell column
-CY = [60,  160, 260]   # Y per speed row
+# ---- Grid: single column along Y axis ----
+# All 9 combos stacked vertically: (Speed x Dwell) ordered row by row
+CX_CENTER = 150          # fixed X for all units
+CY_START  = 50           # Y of first unit center
+CY_STEP   = 40           # mm between unit centers
+COMBOS = [(sp, dw) for sp in SPEED_VALS for dw in DWELL_VALS]  # 9 combos
+CY_LIST = [CY_START + i * CY_STEP for i in range(len(COMBOS))]
 
 # ---- Helpers ----
 filament_area = np.pi * (FILAMENT_DIA / 2) ** 2
@@ -79,16 +83,13 @@ c(f'; Fixed: RING_HEIGHT={RING_HEIGHT}mm  Ring speed={RING_SPEED}mm/s')
 c(f';        Approach={APPROACH_MM}mm  Unretract={UNRETRACT_MM}mm  Overlap={OVERLAP_DEG}°')
 c(f';        N_OSC={N_OSC_PER_REV}  LAYER_HEIGHT={LAYER_HEIGHT}mm  Z_AMP=±{Z_AMP:.2f}mm')
 c(f';        E/mm ring={E_RING:.4f}  E/mm mesh={E_MESH:.4f}')
-c('; Factor A rows (Y): PRINT_SPEED = ' + str(SPEED_VALS) + ' mm/s')
-c('; Factor B cols (X): DWELL_MS    = ' + str(DWELL_VALS) + ' ms')
+c('; Factor A: PRINT_SPEED = ' + str(SPEED_VALS) + ' mm/s')
+c('; Factor B: DWELL_MS    = ' + str(DWELL_VALS) + ' ms')
+c('; Layout: single column X=' + str(CX_CENTER) + ', Y increases downward')
 c(';')
-c('; Grid map:')
-c(';              Dwell=1500   Dwell=3000   Dwell=6000')
-for ri, sp in reversed(list(enumerate(SPEED_VALS))):
-    row = f'; Speed={sp}mm/s  '
-    for ci in range(len(DWELL_VALS)):
-        row += f'[{ri+1},{ci+1}]X{CX[ci]}Y{CY[ri]}   '
-    c(row)
+c('; Unit  Speed      Dwell    CenterY')
+for i, (sp, dw) in enumerate(COMBOS):
+    c(f';  [{i+1:2d}]  {sp}mm/s    {dw}ms    Y={CY_LIST[i]}')
 c('; ==================================================')
 c('')
 
@@ -193,13 +194,12 @@ def emit_mesh_layer(cx, cy, print_speed, dwell_ms):
     c('G92 E0')
 
 # ---- Grid ----
-for ri, print_speed in enumerate(SPEED_VALS):
-    for ci, dwell_ms in enumerate(DWELL_VALS):
-        cx = CX[ci]
-        cy = CY[ri]
+for i, (print_speed, dwell_ms) in enumerate(COMBOS):
+        cx = CX_CENTER
+        cy = CY_LIST[i]
 
         c(f'; ============================================================')
-        c(f'; [{ri+1},{ci+1}]  Speed={print_speed}mm/s  Dwell={dwell_ms}ms')
+        c(f'; [{i+1:2d}]  Speed={print_speed}mm/s  Dwell={dwell_ms}ms')
         c(f'; Center: X{cx} Y{cy}')
         c(f'; ============================================================')
 
@@ -257,10 +257,7 @@ print()
 print(f'Geometry: N_OSC={N_OSC_PER_REV}  Span={np.pi*CIRCLE_DIA/N_OSC_PER_REV:.1f}mm'
       f'  Z_AMP=±{Z_AMP:.2f}mm  Angle={np.degrees(np.arctan(2*Z_AMP/(np.pi*CIRCLE_DIA/N_OSC_PER_REV))):.1f}°')
 print()
-print('Grid map:')
-print(f'{"":14}' + ''.join(f'Dwell={d}ms  ' for d in DWELL_VALS))
-for ri, sp in reversed(list(enumerate(SPEED_VALS))):
-    row = f'Speed={sp}mm/s  '
-    for ci in range(len(DWELL_VALS)):
-        row += f'[{ri+1},{ci+1}]X{CX[ci]:3d}Y{CY[ri]:3d}   '
-    print(row)
+print('Layout (single column X={CX_CENTER}):')
+print(f'  {"Unit":4}  {"Speed":10}  {"Dwell":8}  CenterY')
+for i, (sp, dw) in enumerate(COMBOS):
+    print(f'  [{i+1:2d}]   {sp}mm/s      {dw}ms      Y={CY_LIST[i]}')
